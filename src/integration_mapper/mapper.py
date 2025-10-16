@@ -18,6 +18,10 @@ from typing import Dict, List, Any, Set, Optional, Tuple
 from collections import defaultdict
 from datetime import datetime
 
+# Import formatters
+from .formatters import VerboseFormatter, CompactFormatter
+from .utils import CompactDecoder
+
 
 # ============================================================================
 # PHASE 1: HIERARCHY BUILDING
@@ -388,13 +392,17 @@ class FlowAnalyzer:
 class IntegrationMapper:
     """Main orchestrator for three-phase analysis."""
 
-    def __init__(self, root_path: Path, exclude_patterns: Optional[List[str]] = None):
+    def __init__(self, root_path: Path, exclude_patterns: Optional[List[str]] = None,
+                 context_aware: bool = False):
         self.root_path = root_path
         self.exclude_patterns = exclude_patterns or []
         self.files: List[Path] = []
         self.symbol_table: Dict[str, Dict[str, Any]] = {}
         self.tree: Dict[str, Any] = {}
         self.integration_edges: List[Dict[str, Any]] = []
+        self.context_aware = context_aware  # Use CompactFormatter if True
+        # Select formatter based on mode
+        self.formatter = CompactFormatter() if context_aware else VerboseFormatter()
 
     def discover_files(self) -> None:
         """Discover all Python files."""
@@ -472,26 +480,23 @@ class IntegrationMapper:
 
     def build_output(self, crossroads: List[Dict[str, Any]],
                      critical_paths: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Build final output JSON."""
-        return {
-            "metadata": {
-                "total_integration_points": len(self.integration_edges),
-                "total_crossroads": len(crossroads),
-                "analysis_timestamp": datetime.now().isoformat(),
-                "files_analyzed": len(self.files),
-                "components_found": len(self.symbol_table)
-            },
-            "codebase_tree": self.tree,
-            "global_integration_map": {
-                "crossroads": crossroads,
-                "critical_paths": critical_paths,
-                "data_flows": [],
-                "statistics": {
-                    "total_components": len(self.symbol_table),
-                    "total_integration_points": len(self.integration_edges)
-                }
-            }
+        """Build final output JSON using selected formatter."""
+        metadata = {
+            "total_integration_points": len(self.integration_edges),
+            "total_crossroads": len(crossroads),
+            "analysis_timestamp": datetime.now().isoformat(),
+            "files_analyzed": len(self.files),
+            "components_found": len(self.symbol_table)
         }
+
+        # Use formatter to generate output
+        return self.formatter.build_output(
+            self.symbol_table,
+            self.integration_edges,
+            metadata,
+            crossroads,
+            critical_paths
+        )
 
     def run(self) -> Dict[str, Any]:
         """Run complete analysis."""
@@ -518,17 +523,23 @@ class IntegrationMapper:
 def main():
     """CLI entry point."""
     parser = argparse.ArgumentParser(
-        description="Integration Mapper: Generate hierarchical integration maps",
+        description="Integration Mapper: Generate hierarchical integration maps with context-aware compression",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Analyze entire directory
+  # Analyze entire directory (default: verbose mode)
   python integration_mapper.py --root ./myproject --output map.json
   python integration_mapper.py --root . --exclude "*/tests/*" --exclude "*/migrations/*"
 
+  # Context-aware mode (85%+ token reduction for Claude Code usage)
+  python integration_mapper.py --root . --context-aware --output compact_map.json
+
+  # Decode compact format back to verbose for analysis
+  python integration_mapper.py --decode compact_map.json --output decoded_map.json
+
   # Analyze single file
   python integration_mapper.py --file mymodule.py --output analysis.json
-  python integration_mapper.py --file src/integration_mapper/mapper.py
+  python integration_mapper.py --file src/integration_mapper/mapper.py --context-aware
         """
     )
 
@@ -537,8 +548,36 @@ Examples:
     parser.add_argument("--output", default="integration_map.json", help="Output JSON file")
     parser.add_argument("--exclude", action="append", help="Glob pattern to exclude")
     parser.add_argument("--verbose", action="store_true", help="Verbose output")
+    parser.add_argument("--context-aware", action="store_true",
+                       help="Generate compact format for context-aware AI (85%+ token reduction)")
+    parser.add_argument("--decode", help="Decode compact format JSON file back to verbose")
 
     args = parser.parse_args()
+
+    # Handle decode mode (if --decode flag is provided)
+    if args.decode:
+        # Load compact format and decode to verbose
+        try:
+            with open(args.decode, 'r') as f:
+                compact_map = json.load(f)
+
+            decoder = CompactDecoder()
+            decoded_map = decoder.decode(compact_map)
+
+            # Write decoded output
+            output_path = Path(args.output)
+            with open(output_path, 'w') as f:
+                json.dump(decoded_map, f, indent=2)
+
+            print(f"\n✅ Decoding complete!")
+            print(f"Input (compact): {args.decode}")
+            print(f"Output (verbose): {output_path}\n")
+
+            return 0
+
+        except Exception as e:
+            print(f"❌ Error decoding: {e}")
+            return 1
 
     # Validate mutually exclusive arguments
     if not args.root and not args.file:
@@ -561,7 +600,7 @@ Examples:
 
         # Use file's parent directory as root
         root_path = file_path.parent
-        mapper = IntegrationMapper(root_path, args.exclude)
+        mapper = IntegrationMapper(root_path, args.exclude, context_aware=args.context_aware)
         # Override files list to only include the specified file
         mapper.files = [file_path]
     else:
@@ -571,19 +610,29 @@ Examples:
             print(f"❌ Root path not found: {root_path}")
             return 1
 
-        mapper = IntegrationMapper(root_path, args.exclude)
+        mapper = IntegrationMapper(root_path, args.exclude, context_aware=args.context_aware)
 
     output = mapper.run()
 
     # Write output
     output_path = Path(args.output)
     with open(output_path, 'w') as f:
-        json.dump(output, f, indent=2)
+        # Use compact JSON for context-aware mode
+        if args.context_aware:
+            json.dump(output, f, separators=(',', ':'))  # Minified
+        else:
+            json.dump(output, f, indent=2)  # Pretty-printed
+
+    # Get metadata for final report
+    metadata = output.get('metadata', output.get('md', {}))
+    total_points = metadata.get('total_integration_points', metadata.get('tip', 0))
+    total_crossroads = metadata.get('total_crossroads', metadata.get('crs', 0))
 
     print(f"\n✅ Analysis complete!")
     print(f"Output: {output_path}")
-    print(f"Integration points: {output['metadata']['total_integration_points']}")
-    print(f"Crossroads: {output['metadata']['total_crossroads']}\n")
+    print(f"Mode: {'Context-Aware (Compact)' if args.context_aware else 'Verbose'}")
+    print(f"Integration points: {total_points}")
+    print(f"Crossroads: {total_crossroads}\n")
 
     return 0
 
