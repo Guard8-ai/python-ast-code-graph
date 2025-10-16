@@ -1,7 +1,7 @@
 ---
 id: backend-002
 title: Analyze Django repository with integration mapper
-status: doing
+status: done
 priority: high
 tags:
 - backend
