@@ -498,7 +498,12 @@ class IntegrationMapper:
         print(f"\n🚀 Starting Integration Mapper Analysis")
         print(f"Root: {self.root_path}\n")
 
-        self.discover_files()
+        # Only discover files if not already set (e.g., for single file mode)
+        if not self.files:
+            self.discover_files()
+        else:
+            print(f"Analyzing {len(self.files)} specified file(s)")
+
         self.phase1_build_hierarchy()
         self.phase2_extract_integration()
         crossroads, critical_paths = self.phase3_analyze_flows()
@@ -517,24 +522,57 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
+  # Analyze entire directory
   python integration_mapper.py --root ./myproject --output map.json
   python integration_mapper.py --root . --exclude "*/tests/*" --exclude "*/migrations/*"
+
+  # Analyze single file
+  python integration_mapper.py --file mymodule.py --output analysis.json
+  python integration_mapper.py --file src/integration_mapper/mapper.py
         """
     )
 
-    parser.add_argument("--root", required=True, help="Root directory of codebase")
+    parser.add_argument("--root", help="Root directory of codebase")
+    parser.add_argument("--file", help="Single Python file to analyze")
     parser.add_argument("--output", default="integration_map.json", help="Output JSON file")
     parser.add_argument("--exclude", action="append", help="Glob pattern to exclude")
     parser.add_argument("--verbose", action="store_true", help="Verbose output")
 
     args = parser.parse_args()
 
-    root_path = Path(args.root)
-    if not root_path.exists():
-        print(f"❌ Root path not found: {root_path}")
-        return 1
+    # Validate mutually exclusive arguments
+    if not args.root and not args.file:
+        parser.error("Either --root or --file must be specified")
+    if args.root and args.file:
+        parser.error("Cannot specify both --root and --file")
 
-    mapper = IntegrationMapper(root_path, args.exclude)
+    # Handle single file mode
+    if args.file:
+        file_path = Path(args.file)
+        if not file_path.exists():
+            print(f"❌ File not found: {file_path}")
+            return 1
+        if not file_path.is_file():
+            print(f"❌ Path is not a file: {file_path}")
+            return 1
+        if not file_path.suffix == '.py':
+            print(f"❌ File must be a Python file (.py): {file_path}")
+            return 1
+
+        # Use file's parent directory as root
+        root_path = file_path.parent
+        mapper = IntegrationMapper(root_path, args.exclude)
+        # Override files list to only include the specified file
+        mapper.files = [file_path]
+    else:
+        # Handle directory mode
+        root_path = Path(args.root)
+        if not root_path.exists():
+            print(f"❌ Root path not found: {root_path}")
+            return 1
+
+        mapper = IntegrationMapper(root_path, args.exclude)
+
     output = mapper.run()
 
     # Write output
