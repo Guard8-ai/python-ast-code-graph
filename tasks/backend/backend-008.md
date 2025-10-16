@@ -1,7 +1,7 @@
 ---
 id: backend-008
 title: Implement ComponentIndexer for FQN-to-ID mapping
-status: todo
+status: doing
 priority: high
 tags:
 - backend
