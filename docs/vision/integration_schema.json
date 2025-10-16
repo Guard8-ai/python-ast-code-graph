@@ -1,0 +1,367 @@
+{
+  "metadata": {
+    "codebase_root": "/path/to/project",
+    "analysis_timestamp": "2025-10-16T10:30:00Z",
+    "total_integration_points": 2847,
+    "total_data_flows": 1293,
+    "total_crossroads": 456,
+    "analyzer_version": "1.0.0"
+  },
+
+  "codebase_tree": {
+    "myapp": {
+      "type": "package",
+      "path": "myapp/",
+      "contains": ["models", "views", "utils", "api"],
+      "exports": ["User", "Product", "OrderService"],
+      "entry_points": ["myapp.api.main"],
+      
+      "integration_summary": {
+        "imports_from": ["django", "sqlalchemy", "requests"],
+        "imported_by": ["tests", "scripts"],
+        "internal_crossroads": 45,
+        "external_dependencies": 12
+      },
+
+      "children": {
+        "models": {
+          "type": "module",
+          "path": "myapp/models/__init__.py",
+          "exports": ["User", "Product", "Order"],
+          "integration_points": 78,
+          
+          "children": {
+            "user": {
+              "type": "module",
+              "path": "myapp/models/user.py",
+              "line_range": [1, 150],
+              "imports": [
+                {
+                  "source": "django.db.models",
+                  "items": ["Model", "CharField", "EmailField"],
+                  "usage_count": 15,
+                  "integration_type": "dependency"
+                },
+                {
+                  "source": "myapp.utils.validators",
+                  "items": ["validate_email"],
+                  "usage_count": 3,
+                  "integration_type": "internal_crossroad"
+                }
+              ],
+              
+              "children": {
+                "User": {
+                  "type": "class",
+                  "line_range": [15, 89],
+                  "inherits": ["django.db.models.Model"],
+                  "implements": ["AuthMixin"],
+                  "docstring": "User model for authentication and profile management",
+                  
+                  "attributes": {
+                    "username": {
+                      "type": "CharField",
+                      "line": 18,
+                      "read_by": ["User.save", "User.validate", "auth.login"],
+                      "written_by": ["User.__init__", "User.update_profile"],
+                      "data_flow_type": "state"
+                    },
+                    "email": {
+                      "type": "EmailField",
+                      "line": 19,
+                      "read_by": ["User.send_notification", "auth.reset_password"],
+                      "written_by": ["User.update_email"],
+                      "data_flow_type": "state"
+                    }
+                  },
+                  
+                  "methods": {
+                    "save": {
+                      "type": "method",
+                      "line_range": [42, 56],
+                      "parameters": [
+                        {"name": "self", "type": "User"},
+                        {"name": "force_insert", "type": "bool", "default": false},
+                        {"name": "kwargs", "type": "dict"}
+                      ],
+                      "return_type": "None",
+                      "docstring": "Override save to add validation and logging",
+                      
+                      "integration_points": {
+                        "calls": [
+                          {
+                            "target": "super().save",
+                            "line": 45,
+                            "args": ["force_insert", "kwargs"],
+                            "data_flow": "passes_all_args",
+                            "integration_type": "inheritance_chain"
+                          },
+                          {
+                            "target": "self.validate",
+                            "line": 44,
+                            "args": [],
+                            "return_used": true,
+                            "integration_type": "internal_method_call"
+                          },
+                          {
+                            "target": "myapp.utils.logger.log_user_action",
+                            "line": 54,
+                            "args": ["self.username", "action='save'"],
+                            "data_flow": "passes_username_state",
+                            "integration_type": "cross_module_junction"
+                          }
+                        ],
+                        
+                        "called_by": [
+                          {
+                            "source": "myapp.api.user_endpoints.create_user",
+                            "line": 78,
+                            "context": "API endpoint for user creation",
+                            "data_flow": "receives_request_data",
+                            "integration_type": "api_to_model"
+                          },
+                          {
+                            "source": "myapp.views.profile.update_profile",
+                            "line": 45,
+                            "context": "View for profile updates",
+                            "integration_type": "view_to_model"
+                          }
+                        ],
+                        
+                        "reads_attributes": [
+                          {"attr": "self.username", "line": 43, "purpose": "validation"},
+                          {"attr": "self.email", "line": 44, "purpose": "validation"}
+                        ],
+                        
+                        "writes_attributes": [
+                          {"attr": "self.updated_at", "line": 53, "value": "timezone.now()"}
+                        ],
+                        
+                        "data_flows": [
+                          {
+                            "flow_id": "user_save_flow",
+                            "path": ["request_data", "self.validate()", "super().save()", "database"],
+                            "data_transformations": ["validation", "serialization", "persistence"]
+                          }
+                        ]
+                      },
+                      
+                      "crossroad_analysis": {
+                        "junction_type": "critical_path",
+                        "intersects_with": ["api", "utils", "database"],
+                        "side_effects": ["database_write", "logging", "cache_invalidation"],
+                        "error_paths": ["ValidationError -> api.error_handler"]
+                      }
+                    },
+                    
+                    "validate": {
+                      "type": "method",
+                      "line_range": [58, 72],
+                      "parameters": [{"name": "self", "type": "User"}],
+                      "return_type": "bool",
+                      
+                      "integration_points": {
+                        "calls": [
+                          {
+                            "target": "myapp.utils.validators.validate_email",
+                            "line": 65,
+                            "args": ["self.email"],
+                            "integration_type": "cross_module_dependency"
+                          }
+                        ],
+                        "called_by": [
+                          {
+                            "source": "User.save",
+                            "line": 44,
+                            "integration_type": "internal_chain"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  
+                  "class_integration_summary": {
+                    "total_integration_points": 23,
+                    "external_dependencies": 8,
+                    "internal_calls": 15,
+                    "integration_types": {
+                      "api_to_model": 5,
+                      "view_to_model": 7,
+                      "cross_module_junction": 11
+                    }
+                  }
+                },
+                
+                "UserManager": {
+                  "type": "class",
+                  "line_range": [92, 135],
+                  "inherits": ["django.db.models.Manager"],
+                  "methods": {
+                    "get_active_users": {
+                      "type": "method",
+                      "line_range": [95, 103],
+                      "integration_points": {
+                        "calls": [
+                          {
+                            "target": "self.filter",
+                            "line": 102,
+                            "args": ["is_active=True"],
+                            "integration_type": "orm_query"
+                          }
+                        ],
+                        "called_by": [
+                          {
+                            "source": "myapp.api.admin.list_users",
+                            "integration_type": "api_to_manager"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              
+              "module_integration_summary": {
+                "total_classes": 2,
+                "total_functions": 0,
+                "integration_points": 78,
+                "crossroads_with": ["api", "views", "utils", "database"],
+                "data_flows_through": 12
+              }
+            }
+          }
+        },
+        
+        "api": {
+          "type": "module",
+          "path": "myapp/api/__init__.py",
+          
+          "children": {
+            "user_endpoints": {
+              "type": "module",
+              "path": "myapp/api/user_endpoints.py",
+              
+              "children": {
+                "create_user": {
+                  "type": "function",
+                  "line_range": [65, 95],
+                  "parameters": [
+                    {"name": "request", "type": "Request"},
+                    {"name": "data", "type": "dict"}
+                  ],
+                  "return_type": "Response",
+                  
+                  "integration_points": {
+                    "calls": [
+                      {
+                        "target": "myapp.models.user.User",
+                        "line": 78,
+                        "args": ["username=data['username']", "email=data['email']"],
+                        "integration_type": "api_to_model_instantiation"
+                      },
+                      {
+                        "target": "user.save",
+                        "line": 79,
+                        "integration_type": "model_persistence"
+                      },
+                      {
+                        "target": "myapp.utils.serializers.serialize_user",
+                        "line": 85,
+                        "args": ["user"],
+                        "integration_type": "cross_module_serialization"
+                      }
+                    ],
+                    
+                    "data_flows": [
+                      {
+                        "flow_id": "user_creation_flow",
+                        "path": [
+                          "request.body",
+                          "validate_request_data()",
+                          "User()",
+                          "user.save()",
+                          "database",
+                          "serialize_user()",
+                          "Response"
+                        ],
+                        "integration_junctions": [
+                          "api -> models (User instantiation)",
+                          "models -> database (save)",
+                          "models -> utils (serialization)",
+                          "utils -> api (response)"
+                        ]
+                      }
+                    ]
+                  },
+                  
+                  "crossroad_analysis": {
+                    "junction_type": "api_gateway",
+                    "incoming_from": ["external_requests"],
+                    "outgoing_to": ["models", "utils", "database"],
+                    "integration_complexity": "high",
+                    "critical_path": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  
+  "global_integration_map": {
+    "crossroads": [
+      {
+        "id": "api_to_models_junction",
+        "type": "module_boundary",
+        "components": ["myapp.api", "myapp.models"],
+        "integration_points": 45,
+        "common_patterns": [
+          "API endpoints instantiate model classes",
+          "API endpoints call model.save()",
+          "API endpoints query via model managers"
+        ],
+        "data_flow_directions": ["api -> models", "models -> api (via serializers)"]
+      },
+      {
+        "id": "models_to_database_junction",
+        "type": "persistence_boundary",
+        "components": ["myapp.models", "database"],
+        "integration_points": 89,
+        "orm_layer": "django.db"
+      }
+    ],
+    
+    "critical_paths": [
+      {
+        "path_id": "user_authentication_flow",
+        "components": [
+          "myapp.api.auth.login",
+          "myapp.models.user.User.validate_credentials",
+          "myapp.utils.jwt.create_token",
+          "myapp.api.auth.set_cookie"
+        ],
+        "integration_types": ["api_call", "model_method", "utility_function", "response_mutation"],
+        "data_flow": "request -> validate -> token -> response"
+      }
+    ],
+    
+    "data_flows": [
+      {
+        "flow_id": "order_processing_flow",
+        "entry_point": "myapp.api.orders.create_order",
+        "exit_point": "myapp.tasks.send_confirmation_email",
+        "path": [
+          "api.orders.create_order",
+          "models.order.Order.save",
+          "models.product.Product.decrement_stock",
+          "utils.payment.process_payment",
+          "tasks.send_confirmation_email"
+        ],
+        "crossroads": ["api->models", "models->utils", "utils->tasks"],
+        "integration_complexity": "very_high"
+      }
+    ]
+  }
+}
