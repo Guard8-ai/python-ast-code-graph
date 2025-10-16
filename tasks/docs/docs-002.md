@@ -1,7 +1,7 @@
 ---
 id: docs-002
 title: Create developer quick-start commands guide
-status: doing
+status: done
 priority: high
 tags:
 - docs
