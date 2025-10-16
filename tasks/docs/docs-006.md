@@ -1,7 +1,7 @@
 ---
 id: docs-006
 title: Create comprehensive wiki documentation
-status: doing
+status: done
 priority: high
 tags:
 - docs
