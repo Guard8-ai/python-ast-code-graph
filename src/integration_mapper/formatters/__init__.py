@@ -10,5 +10,6 @@ between formats based on use case.
 """
 
 from .base_formatter import BaseFormatter
+from .verbose_formatter import VerboseFormatter
 
-__all__ = ["BaseFormatter"]
+__all__ = ["BaseFormatter", "VerboseFormatter"]
