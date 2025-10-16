@@ -1,7 +1,7 @@
 ---
 id: testing-003
 title: 'Task 8: Comprehensive tests - Validate compression, round-trip, and CLI integration'
-status: doing
+status: done
 priority: high
 tags:
 - testing
