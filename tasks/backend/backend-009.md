@@ -1,7 +1,7 @@
 ---
 id: backend-009
 title: Create abbreviation mappings and helper functions
-status: doing
+status: done
 priority: high
 tags:
 - backend
