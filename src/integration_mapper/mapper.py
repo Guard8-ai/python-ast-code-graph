@@ -586,14 +586,37 @@ Examples:
 
     output = mapper.run()
 
+    # Import formatters
+    module_dir = Path(__file__).parent
+    sys.path.insert(0, str(module_dir.parent))
+    try:
+        from integration_mapper.formatters import CompactFormatter, VerboseFormatter
+        from integration_mapper.utils import estimate_token_count
+    except ImportError:
+        # Fallback for relative imports
+        import importlib.util
+        compact_spec = importlib.util.spec_from_file_location(
+            "compact_formatter",
+            module_dir / "formatters" / "compact_formatter.py"
+        )
+        compact_module = importlib.util.module_from_spec(compact_spec)
+        compact_spec.loader.exec_module(compact_module)
+
+        verbose_spec = importlib.util.spec_from_file_location(
+            "verbose_formatter",
+            module_dir / "formatters" / "verbose_formatter.py"
+        )
+        verbose_module = importlib.util.module_from_spec(verbose_spec)
+        verbose_spec.loader.exec_module(verbose_module)
+
+        CompactFormatter = compact_module.CompactFormatter
+        VerboseFormatter = verbose_module.VerboseFormatter
+
     # Choose formatter
     if args.context_aware:
-        from .formatters import CompactFormatter
-        from .utils import estimate_token_count
         formatter = CompactFormatter()
         print("📦 Using context-aware compact format (token-efficient)")
     else:
-        from .formatters import VerboseFormatter
         formatter = VerboseFormatter()
         print("📋 Using verbose format (default, full details)")
 
