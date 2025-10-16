@@ -1,7 +1,7 @@
 ---
 id: backend-013
 title: 'Task 6: Decoder utility - Expand compact format to verbose for analysis'
-status: todo
+status: doing
 priority: high
 tags:
 - backend
