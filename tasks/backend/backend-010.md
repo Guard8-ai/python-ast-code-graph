@@ -1,7 +1,7 @@
 ---
 id: backend-010
 title: 'Task 3: BaseFormatter abstraction - Abstract base class for pluggable formatters'
-status: todo
+status: doing
 priority: high
 tags:
 - backend
