@@ -196,15 +196,20 @@ python scripts/verify_environment.py
 
 #### Quick Start
 
-**Basic Analysis:**
+**Basic Directory Analysis:**
 ```bash
 python src/integration_mapper/mapper.py --root /path/to/your/project --output analysis.json
+```
+
+**Single File Analysis:**
+```bash
+python src/integration_mapper/mapper.py --file /path/to/module.py --output file_analysis.json
 ```
 
 **With Exclusions:**
 ```bash
 python src/integration_mapper/mapper.py --root /path/to/project --output analysis.json \
-  --exclude tests,.git,venv,__pycache__
+  --exclude "*/tests/*" --exclude "*/.git/*" --exclude "*/venv/*"
 ```
 
 **Verbose Mode:**

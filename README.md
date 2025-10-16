@@ -152,19 +152,26 @@ python scripts/verify_environment.py
 python src/integration_mapper/mapper.py [OPTIONS]
 
 Options:
-  --root PATH          Project root directory (required)
-  --output PATH        Output JSON file path (required)
-  --exclude PATTERNS   Comma-separated exclusion patterns (default: tests,.git,venv)
+  --root PATH          Project root directory (mutually exclusive with --file)
+  --file PATH          Single Python file to analyze (mutually exclusive with --root)
+  --output PATH        Output JSON file path (default: integration_map.json)
+  --exclude PATTERNS   Glob patterns to exclude (can be specified multiple times)
   --verbose           Show detailed progress messages
 ```
 
-**Example:**
+**Examples:**
 ```bash
+# Analyze entire directory
 python src/integration_mapper/mapper.py \
   --root /path/to/project \
   --output analysis.json \
-  --exclude tests,docs,.git,venv \
+  --exclude "*/tests/*" --exclude "*/migrations/*" \
   --verbose
+
+# Analyze single file
+python src/integration_mapper/mapper.py \
+  --file src/integration_mapper/mapper.py \
+  --output single_file_analysis.json
 ```
 
 ---

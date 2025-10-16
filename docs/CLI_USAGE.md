@@ -7,24 +7,36 @@ The Integration Mapper provides a comprehensive CLI for analyzing Python codebas
 ### Basic Usage
 
 ```bash
+# Analyze entire directory
 python integration_mapper.py --root /path/to/project --output map.json
+
+# Analyze single file
+python integration_mapper.py --file /path/to/module.py --output analysis.json
 ```
 
 ### Arguments
 
 | Argument | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `--root` | ✅ YES | N/A | Root directory of codebase to analyze |
+| `--root` | ⚠️ CONDITIONAL | N/A | Root directory of codebase to analyze (mutually exclusive with --file) |
+| `--file` | ⚠️ CONDITIONAL | N/A | Single Python file to analyze (mutually exclusive with --root) |
 | `--output` | ❌ NO | `integration_map.json` | Output JSON file path |
-| `--exclude` | ❌ NO | N/A | Glob pattern to exclude files (repeatable) |
+| `--exclude` | ❌ NO | N/A | Glob pattern to exclude files (repeatable, only with --root) |
 | `--verbose` | ❌ NO | False | Show progress output during analysis |
 | `-h, --help` | ❌ NO | N/A | Show help message |
+
+**Note:** Either `--root` or `--file` must be specified, but not both.
 
 ### Examples
 
 #### Analyze current directory
 ```bash
 python integration_mapper.py --root .
+```
+
+#### Analyze single Python file
+```bash
+python integration_mapper.py --file src/integration_mapper/mapper.py --output mapper_analysis.json
 ```
 
 #### Specify custom output file
