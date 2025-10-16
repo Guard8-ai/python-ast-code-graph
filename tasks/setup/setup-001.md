@@ -1,21 +1,19 @@
 ---
-id: integration-001
-title: Wire all components together
+id: setup-001
+title: Verify Python environment
 status: done
-priority: critical
+priority: high
 tags:
-- integration
-dependencies:
-- backend-001
-- api-001
+- setup
+dependencies: []
 assignee: developer
-created: 2025-10-16T10:43:45.943288Z
+created: 2025-10-16T10:43:45.912515Z
 estimate: ~
 complexity: 3
-area: integration
+area: setup
 ---
 
-# Wire all components together
+# Verify Python environment
 
 ## Context
 Brief description of what needs to be done and why.

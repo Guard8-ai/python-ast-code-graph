@@ -1,21 +1,19 @@
 ---
-id: integration-001
-title: Wire all components together
+id: docs-001
+title: Design JSON schema and architecture
 status: done
 priority: critical
 tags:
-- integration
-dependencies:
-- backend-001
-- api-001
+- docs
+dependencies: []
 assignee: developer
-created: 2025-10-16T10:43:45.943288Z
+created: 2025-10-16T10:43:45.925361Z
 estimate: ~
 complexity: 3
-area: integration
+area: docs
 ---
 
-# Wire all components together
+# Design JSON schema and architecture
 
 ## Context
 Brief description of what needs to be done and why.

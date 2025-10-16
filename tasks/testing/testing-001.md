@@ -1,21 +1,20 @@
 ---
-id: integration-001
-title: Wire all components together
-status: done
-priority: critical
+id: testing-001
+title: Validate output quality
+status: todo
+priority: high
 tags:
-- integration
+- testing
 dependencies:
-- backend-001
-- api-001
+- integration-001
 assignee: developer
-created: 2025-10-16T10:43:45.943288Z
+created: 2025-10-16T10:43:45.949574Z
 estimate: ~
 complexity: 3
-area: integration
+area: testing
 ---
 
-# Wire all components together
+# Validate output quality
 
 ## Context
 Brief description of what needs to be done and why.

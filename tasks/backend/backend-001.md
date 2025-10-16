@@ -1,21 +1,21 @@
 ---
-id: integration-001
-title: Wire all components together
+id: backend-001
+title: Build AST analysis engine
 status: done
 priority: critical
 tags:
-- integration
+- backend
 dependencies:
-- backend-001
-- api-001
+- setup-001
+- docs-001
 assignee: developer
-created: 2025-10-16T10:43:45.943288Z
+created: 2025-10-16T10:43:45.932156Z
 estimate: ~
 complexity: 3
-area: integration
+area: backend
 ---
 
-# Wire all components together
+# Build AST analysis engine
 
 ## Context
 Brief description of what needs to be done and why.
