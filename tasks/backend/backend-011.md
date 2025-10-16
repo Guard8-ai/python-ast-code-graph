@@ -1,7 +1,7 @@
 ---
 id: backend-011
 title: 'Task 4: VerboseFormatter refactor - Extract existing logic to extend BaseFormatter'
-status: doing
+status: done
 priority: high
 tags:
 - backend
