@@ -1,7 +1,7 @@
 ---
 id: testing-001
 title: Validate output quality
-status: todo
+status: doing
 priority: high
 tags:
 - testing
