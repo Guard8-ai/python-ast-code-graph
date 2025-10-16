@@ -1,7 +1,7 @@
 ---
 id: backend-008
 title: 'Add CLI flags: --context-aware and token validation'
-status: doing
+status: done
 priority: high
 tags:
 - backend
