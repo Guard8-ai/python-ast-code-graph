@@ -1,7 +1,7 @@
 ---
 id: docs-007
 title: 'Task 9: Documentation update - Add context-aware flags and compression benefits to README'
-status: todo
+status: doing
 priority: high
 tags:
 - docs
