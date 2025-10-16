@@ -1,7 +1,7 @@
 ---
 id: backend-014
 title: 'Task 7: CLI integration - Add --context-aware and --decode flags to mapper.py'
-status: todo
+status: doing
 priority: high
 tags:
 - backend
