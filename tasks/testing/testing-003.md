@@ -1,7 +1,7 @@
 ---
 id: testing-003
 title: Test and validate context-aware compression with real codebase
-status: doing
+status: done
 priority: high
 tags:
 - testing
