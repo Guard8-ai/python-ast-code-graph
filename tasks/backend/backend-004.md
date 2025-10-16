@@ -1,7 +1,7 @@
 ---
 id: backend-004
 title: Add context token counting utility for Claude Code sessions
-status: todo
+status: done
 priority: high
 tags:
 - backend
