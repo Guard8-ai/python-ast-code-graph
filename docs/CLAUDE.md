@@ -80,7 +80,67 @@ taskguard task update <task-id> <item-index> done
 
 ## Commands for Development
 
-Since this is a specification repository, there are no build or test commands yet. The focus is on:
+### Custom Slash Commands (Claude Code)
+
+This project includes custom slash commands for intelligent Python codebase analysis:
+
+#### `/analyze-python`
+Analyze the Python codebase using AST-based integration mapping and load insights into working memory.
+
+```
+/analyze-python
+```
+
+**What it does:**
+- Runs integration mapper in context-aware mode (61-70% token reduction)
+- Generates compact analysis file
+- Loads crossroads and critical paths into memory
+- Enables instant architecture queries without file re-parsing
+
+**When to use:**
+- Start of session to get codebase overview
+- Before complex refactoring to understand architecture
+- When joining a new project
+
+**Performance:**
+- Small projects (10-50 files): 1-5 seconds
+- Medium projects (50-200 files): 5-15 seconds
+- Large projects (900+ files): 20-30 seconds
+
+**Memory impact:**
+- Frees up 55-65% of context for actual work
+- Stores analysis at `.claude/codebase_analysis.json` (gitignored)
+
+#### `/refresh-analysis`
+Refresh the codebase analysis to reflect recent code changes.
+
+```
+/refresh-analysis
+```
+
+**What it does:**
+- Re-runs integration mapper
+- Compares with previous analysis
+- Reports changes (new files, crossroads, etc.)
+- Updates working memory
+
+**When to use:**
+- After adding new modules
+- After major refactoring
+- After merging feature branches
+- Periodically (weekly for active projects)
+
+**Benefits:**
+- Keeps analysis current without manual tracking
+- Shows what changed in architecture
+- Maintains accurate working memory
+
+### Reference Documentation
+
+For full command details, see:
+- `.claude/commands/README.md` - Command overview
+- `.claude/commands/analyze-python.md` - Detailed usage guide
+- `.claude/commands/refresh-analysis.md` - Refresh documentation
 
 ### Documentation Reading
 ```bash
@@ -96,6 +156,24 @@ cat P1_refined_prompt.md            # Read final refined prompt
 ```bash
 # Check JSON schema validity
 python -m json.tool integration_schema.json > /dev/null
+```
+
+### Integration Mapper (CLI)
+
+For direct access to the integration mapper:
+
+```bash
+# Analyze entire directory (verbose format)
+python src/integration_mapper/mapper.py --root . --output map.json
+
+# Context-aware mode (61-70% smaller, token-efficient)
+python src/integration_mapper/mapper.py --root . --output map.json --context-aware
+
+# Pretty-printed for debugging
+python src/integration_mapper/mapper.py --root . --output map.json --context-aware --readable
+
+# Verify token counts
+python scripts/count_tokens.py map.json
 ```
 
 ### TaskGuard Management
