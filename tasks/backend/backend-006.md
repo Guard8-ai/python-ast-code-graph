@@ -1,7 +1,7 @@
 ---
 id: backend-006
 title: 'Implement compression utilities: indexer and abbreviations'
-status: doing
+status: done
 priority: high
 tags:
 - backend
