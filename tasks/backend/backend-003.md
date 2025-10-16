@@ -1,7 +1,7 @@
 ---
 id: backend-003
 title: Add support for single file analysis with --file flag
-status: doing
+status: done
 priority: high
 tags:
 - backend
