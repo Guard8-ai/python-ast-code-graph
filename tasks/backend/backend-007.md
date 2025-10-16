@@ -1,7 +1,7 @@
 ---
 id: backend-007
 title: 'Implement CompactFormatter: crossroads-focused compression'
-status: doing
+status: done
 priority: high
 tags:
 - backend
